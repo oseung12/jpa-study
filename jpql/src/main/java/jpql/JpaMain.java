@@ -1,37 +1,1 @@
-package jpql;
-
-import javax.persistence.*;
-
-public class JpaMain {
-    public static void main(String[] args) {
-        EntityManagerFactory emf =Persistence.createEntityManagerFactory("hello");
-
-        EntityManager em = emf.createEntityManager();
-
-        EntityTransaction tx= em.getTransaction();
-
-        tx.begin();
-        try{
-
-          Member member = new Member();
-          member.setUsername("member1");
-          member.setAge(10);
-          em.persist(member);
-
-          //파라미터 바인딩
-          Member result = em.createQuery("select m from Member m where m.username = :username", Member.class)
-                  .setParameter("username", "member1")
-                  .getSingleResult();
-
-            System.out.println("result = " + result.getUsername());
-
-            tx.commit();
-        } catch (Exception e){
-            tx.rollback();
-        }finally {
-            em.close();
-        }
-
-        emf.close();
-    }
-}
+package jpql;import javax.persistence.*;import java.util.List;public class JpaMain {    public static void main(String[] args) {        EntityManagerFactory emf =Persistence.createEntityManagerFactory("hello");        EntityManager em = emf.createEntityManager();        EntityTransaction tx= em.getTransaction();        tx.begin();        try{          Member member = new Member();          member.setUsername("member1");          member.setAge(10);          em.persist(member);          em.flush();          em.clear();          //프로젝션          List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)                  .getResultList();          MemberDTO memberDTO = result.get(0);          System.out.println("memberDTO = " + memberDTO.getUsername());          System.out.println("memberDTO = " + memberDTO.getAge());            tx.commit();        } catch (Exception e){            tx.rollback();        }finally {            em.close();        }        emf.close();    }}
